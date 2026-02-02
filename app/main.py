@@ -56,7 +56,7 @@ DASHBOARD_PERSONAS = {
     'CEO': {
         'nombre': 'Carlos Mendoza',
         'cargo': 'Chief Executive Officer (CEO)',
-        'foto_emoji': '',
+        'iniciales': 'CM',
         'descripcion': 'Ejecutivo con 15 años de experiencia en retail y e-commerce. Responsable de la visión estratégica y el crecimiento sostenible del negocio.',
         'objetivos': [
             'Maximizar el valor del negocio (GMV)',
@@ -83,7 +83,7 @@ DASHBOARD_PERSONAS = {
     'CMO': {
         'nombre': 'María García',
         'cargo': 'Chief Marketing Officer (CMO)',
-        'foto_emoji': '',
+        'iniciales': 'MG',
         'descripcion': 'Experta en marketing digital con enfoque en growth hacking y análisis de comportamiento del consumidor. Lidera las estrategias de adquisición y retención.',
         'objetivos': [
             'Optimizar el costo de adquisición de clientes (CAC)',
@@ -110,7 +110,7 @@ DASHBOARD_PERSONAS = {
     'COO': {
         'nombre': 'Roberto Silva',
         'cargo': 'Chief Operations Officer (COO)',
-        'foto_emoji': '',
+        'iniciales': 'RS',
         'descripcion': 'Ingeniero industrial con expertise en logística y optimización de procesos. Responsable de la eficiencia operacional y satisfacción del cliente.',
         'objetivos': [
             'Reducir tiempos de entrega a menos de 7 días',
@@ -954,7 +954,7 @@ def render_dashboard_persona(stakeholder_key):
     st.markdown(f"""
     <div class="persona-card" style="border-top-color: {color};">
         <div class="persona-header">
-            <div class="persona-avatar">{persona['foto_emoji']}</div>
+            <div class="persona-avatar" style="background: {color}; color: white; font-weight: 700; font-size: 1.2rem;">{persona['iniciales']}</div>
             <div class="persona-info">
                 <h3>{persona['nombre']}</h3>
                 <p>{persona['cargo']}</p>
@@ -1528,15 +1528,25 @@ def render_coo_dashboard(df, kpis):
     with col1:
         df_temp = df.copy()
         df_temp['delivery_bin'] = pd.cut(df_temp['dias_entrega'], bins=[0, 7, 14, 21, 100],
-                                        labels=['1-7 días\n(Rápido)', '8-14 días\n(Normal)',
-                                               '15-21 días\n(Lento)', '>21 días\n(Muy lento)'])
-        delivery_analysis = df_temp.groupby('delivery_bin', observed=True).agg({'rating': ['mean', 'count'], 'order_id': 'nunique'}).reset_index()
+                                        labels=['1-7 días (Rápido)', '8-14 días (Normal)',
+                                               '15-21 días (Lento)', '>21 días (Muy lento)'])
+        delivery_analysis = df_temp.groupby('delivery_bin', observed=False).agg({'rating': ['mean', 'count'], 'order_id': 'nunique'}).reset_index()
         delivery_analysis.columns = ['Rango', 'Rating Promedio', 'Total Reviews', 'Órdenes']
+        delivery_analysis = delivery_analysis.dropna()
+
+        # Colores basados en el rango
+        color_map = {
+            '1-7 días (Rápido)': NUCLIO_COLORS['green'],
+            '8-14 días (Normal)': NUCLIO_COLORS['yellow'],
+            '15-21 días (Lento)': NUCLIO_COLORS['orange'],
+            '>21 días (Muy lento)': NUCLIO_COLORS['red']
+        }
+        colors = [color_map.get(str(r), NUCLIO_COLORS['gray_medium']) for r in delivery_analysis['Rango']]
 
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            x=delivery_analysis['Rango'], y=delivery_analysis['Rating Promedio'],
-            marker_color=[NUCLIO_COLORS['green'], NUCLIO_COLORS['yellow'], NUCLIO_COLORS['orange'], NUCLIO_COLORS['red']],
+            x=delivery_analysis['Rango'].astype(str), y=delivery_analysis['Rating Promedio'],
+            marker_color=colors,
             text=[f"{r:.2f}" for r in delivery_analysis['Rating Promedio']], textposition='outside'
         ))
         fig.add_hline(y=4.0, line_dash="dash", line_color=NUCLIO_COLORS['black'], annotation_text="Objetivo Rating: 4.0")

@@ -1,4 +1,5 @@
 services:
+  # Dashboard Streamlit
   dashboard:
     build: .
     container_name: nuclio-ecommerce-dashboard
@@ -15,3 +16,46 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    depends_on:
+      - postgres
+
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: nuclio-postgres
+    environment:
+      POSTGRES_USER: nuclio
+      POSTGRES_PASSWORD: nuclio123
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nuclio -d ecommerce"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Metabase - Herramienta de BI
+  metabase:
+    image: metabase/metabase:latest
+    container_name: nuclio-metabase
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: nuclio
+      MB_DB_PASS: nuclio123
+      MB_DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -2,95 +2,120 @@
 
 Dashboard interactivo de análisis de e-commerce desarrollado para **Nuclio Digital School**.
 
-## Descripción
+## Herramientas Incluidas
 
-Este dashboard educativo demuestra:
-- Visiones por stakeholder (CEO, CMO, COO)
-- Árbol de KPIs interactivo
-- Fichas Técnicas de cada KPI (10 componentes)
-- Dashboard Personas para cada stakeholder
-- Análisis del dataset Olist de e-commerce brasileño
+| Herramienta | Puerto | Descripción |
+|-------------|--------|-------------|
+| **Streamlit** | 8501 | Dashboard interactivo con KPIs y visualizaciones |
+| **Metabase** | 3000 | Herramienta de BI para exploración de datos |
+| **PostgreSQL** | 5432 | Base de datos con el dataset de Olist |
 
 ## Requisitos
 
-- Docker
-- Docker Compose
+- Docker Desktop instalado y corriendo
+- Git
 
 ## Despliegue Rápido
 
-1. Clonar el repositorio:
 ```bash
-git clone <url-del-repositorio>
-cd ecommerce-dashboard
-```
-
-2. Construir y ejecutar:
-```bash
+git clone https://github.com/tipping-points/dashboard-ecommerce.git
+cd dashboard-ecommerce
 docker-compose up -d --build
 ```
 
-3. Abrir en el navegador:
+## Acceso a las Herramientas
+
+### Streamlit Dashboard
 ```
 http://localhost:8501
+```
+Dashboard listo para usar con visualizaciones de KPIs.
+
+### Metabase
+```
+http://localhost:3000
+```
+
+**Configuración inicial de Metabase:**
+1. Abrir http://localhost:3000
+2. Crear cuenta de administrador
+3. Conectar a la base de datos:
+   - Tipo: **PostgreSQL**
+   - Host: **postgres**
+   - Puerto: **5432**
+   - Base de datos: **ecommerce**
+   - Usuario: **nuclio**
+   - Contraseña: **nuclio123**
+4. Explorar la tabla `ventas` con todos los datos
+
+### PostgreSQL (conexión directa)
+```
+Host: localhost
+Puerto: 5432
+Base de datos: ecommerce
+Usuario: nuclio
+Contraseña: nuclio123
 ```
 
 ## Estructura del Proyecto
 
 ```
-ecommerce-dashboard/
+dashboard-ecommerce/
 ├── app/
-│   ├── .streamlit/
-│   │   └── config.toml      # Configuración de tema
-│   ├── data/
-│   │   └── olist_dashboard_dataset.csv
-│   └── main.py              # Aplicación principal
+│   ├── .streamlit/config.toml
+│   ├── data/olist_dashboard_dataset.csv
+│   └── main.py
+├── init-db/
+│   ├── 01-init.sql
+│   ├── 02-load-data.sh
+│   └── data.csv
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
 ```
 
-## Tecnologías
+## Comandos Útiles
 
-- **Streamlit**: Framework de dashboard
-- **Plotly**: Visualizaciones interactivas
-- **Pandas**: Manipulación de datos
-- **Docker**: Containerización
+**Iniciar todo:**
+```bash
+docker-compose up -d --build
+```
 
-## Framework Educativo
+**Ver logs:**
+```bash
+docker-compose logs -f
+```
 
-### Árbol de KPIs
-- North Star Metric (GMV)
-- Objetivos estratégicos
-- Estrategias
-- Tácticas
-- KPIs operacionales
+**Parar todo:**
+```bash
+docker-compose down
+```
 
-### Dashboard Personas
-Cada stakeholder tiene un perfil definido con:
-- Objetivos
-- Pain Points
-- Necesidades del Dashboard
-- KPIs principales
+**Reiniciar con datos limpios:**
+```bash
+docker-compose down -v
+docker-compose up -d --build
+```
 
-### Ficha Técnica de KPI
-Cada KPI incluye 10 componentes:
-1. Nombre del Indicador
-2. Definición de Negocio
-3. Objetivo (Target)
-4. Frecuencia de Medición
-5. Fuente de Datos
-6. Fórmula Matemática
-7. Unidad de Medida
-8. Responsable
-9. Tipo de KPI
-10. Relación con NSM
+## Dataset
 
-## Colores Nuclio
+El dataset proviene de **Olist**, plataforma de e-commerce brasileña.
 
-- Amarillo: `#FFC630`
-- Negro: `#141414`
-- Blanco: `#FFFFFF`
+**Tabla `ventas`:**
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| order_id | VARCHAR | ID único de la orden |
+| customer_id | VARCHAR | ID del cliente |
+| fecha | DATE | Fecha de la compra |
+| ano | INTEGER | Año |
+| mes | INTEGER | Mes (1-12) |
+| estado | VARCHAR | Estado de Brasil (SP, RJ, etc.) |
+| categoria | VARCHAR | Categoría del producto |
+| precio | DECIMAL | Precio del producto |
+| dias_entrega | DECIMAL | Días hasta la entrega |
+| rating | INTEGER | Calificación (1-5) |
+| metodo_pago | VARCHAR | Forma de pago |
 
 ## Licencia
 
